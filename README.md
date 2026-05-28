@@ -129,6 +129,3 @@ flowchart LR
 ```
 
 Le ZIP est utilisé dans les notebooks Colab / ArcGIS pour charger la librairie sans installation.
-
-
-OK pour ceci 

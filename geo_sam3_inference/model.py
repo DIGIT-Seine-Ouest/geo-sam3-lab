@@ -20,7 +20,7 @@ class Sam3InferenceEngine:
         self.processor = None
         logger.info("Loading SAM3 on %s", self.device)
         try:
-            self.model = Sam3Model.from_pretrained(model_id).to(self.device)
+            self.model = Sam3Model.from_pretrained(model_id).to(self.device)  # type: ignore[arg-type]
             self.processor = Sam3Processor.from_pretrained(model_id)
             logger.info("SAM3 loaded successfully")
         except Exception as e:
