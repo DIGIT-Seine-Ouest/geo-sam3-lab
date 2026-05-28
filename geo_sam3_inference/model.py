@@ -10,7 +10,12 @@ logger = logging.getLogger(__name__)
 
 class Sam3InferenceEngine:
     def __init__(self, model_id: str = "facebook/sam3"):
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        if torch.cuda.is_available():
+            self.device = "cuda"
+        elif torch.backends.mps.is_available():
+            self.device = "mps"
+        else:
+            self.device = "cpu"
         self.model = None
         self.processor = None
         logger.info("Loading SAM3 on %s", self.device)

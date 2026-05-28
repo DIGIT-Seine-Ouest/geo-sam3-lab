@@ -50,6 +50,7 @@ packages = ["geo_sam3_inference"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = ["ignore::rasterio.errors.NotGeoreferencedWarning"]
 
 [tool.coverage.run]
 source = ["geo_sam3_inference"]
