@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environnement
+.env
+.venv/
+venv/
+.python-version
+
+# Dépendances
+uv.lock
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Données
+demo_img/
+output/
+*.tif
+*.tiff
+*.geojson
+*.png
+
+# Modèle HuggingFace (cache local)
+.cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
