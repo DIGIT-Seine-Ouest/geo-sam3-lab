@@ -14,20 +14,27 @@ et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
 | Branche | Dernier commit | Poussée | Mergée dans `main` |
 |---|---|---|---|
-| `main` | `1d6f6b5` | ✅ | — (branche cible) |
-| `feat/library-foundation` | `35de4b7` | ✅ origin | ❌ non |
-| `feat/ci-cd-quality` | *(non commité)* | ❌ | ❌ non |
+| `main` | `43ac7e3` | ✅ | — (branche cible) |
+| `feat/library-foundation` | `35de4b7` | ✅ origin | ✅ via PR #3 |
+| `feat/ci-cd-quality` | `3cd29a9` | ✅ origin | ✅ via PR #3 |
 
-> `feat/ci-cd-quality` (ex-`feat/multi-env-setup`, renommée) est créée à partir de
-> `feat/library-foundation` : elle contient déjà `5de0e8a` + `35de4b7`. La merger dans
-> `main` amène donc à la fois la fondation et l'outillage. Le notebook multi-env
-> (Colab/ArcGIS) reste à venir dans une future branche `feat/multi-env-setup`.
+> `feat/library-foundation` supprimée localement (contenu absorbé par PR #3).
+> Prochaine branche prévue : `feat/multi-env-setup` (notebook externe Colab/ArcGIS — issue #1).
 
 ---
 
-## [Non commité] — branche `feat/ci-cd-quality` · 2026-05-29
+## [Non commité] — `main` · 2026-05-29
 
-Travaux de qualité, d'outillage et de nettoyage. **Pas encore commité ni poussé.**
+### Fixed
+- `model.py` : `self.device` passe de `str` à `torch.device` — corrige l'erreur mypy
+  détectée en CI (`_Wrapped.__call__` attendait `torch.device`, pas `str`).
+
+### Changed
+- `use_cases/pedestrian_crossing/notebook.ipynb` : ajustements du notebook de démo.
+
+---
+
+## `43ac7e3` — Merge PR #3 · `feat/ci-cd-quality` → `main` · 2026-05-29
 
 ### Added
 - CI/CD GitHub Actions :
@@ -37,22 +44,18 @@ Travaux de qualité, d'outillage et de nettoyage. **Pas encore commité ni pouss
 - `.pre-commit-config.yaml` — hooks locaux `ruff` (lint + format) et `mypy`.
 - `CHANGELOG.md` — historique du projet par branche avec statut de merge.
 - Dépendances de dev : `ruff`, `mypy`, `pre-commit`.
-- Dépendance de démo `ipywidgets` — supprime le `TqdmWarning` (IProgress) des
-  barres de progression dans les notebooks.
+- Dépendance de démo `ipywidgets` — supprime le `TqdmWarning` dans les notebooks.
 
 ### Changed
-- Refonte du `README.md` : section utilisateur (fonctionnement → utilisation →
-  use cases) séparée d'une section contributeurs (structure → outillage → releases),
+- Refonte du `README.md` : section utilisateur séparée d'une section contributeurs,
   avec diagrammes Mermaid du pipeline qualité et du flux de release.
-- `pyproject.toml` : `filterwarnings` pytest pour masquer le
-  `NotGeoreferencedWarning` de rasterio (attendu sur les fixtures sans CRS).
-- `model.py` : garde-fou étendu (`self.processor is None`) pour la cohérence du typage.
+- `pyproject.toml` : `filterwarnings` pytest pour masquer le `NotGeoreferencedWarning`.
+- `model.py` : garde-fou étendu (`self.processor is None`).
 
 ### Removed
-- `download_model()` (et son export) — doublon de `from_pretrained`, jamais appelé.
+- `download_model()` — doublon de `from_pretrained`, jamais appelé.
 - Dépendance `gradio` — aucun code associé dans le projet.
-- Fichiers `tests/__init__.py`, `tests/unit/__init__.py`,
-  `tests/functional/__init__.py` — vides et inutiles avec la config pytest.
+- Fichiers `tests/__init__.py` × 3 — vides et inutiles avec la config pytest.
 - Fixture `sample_geo_meta` non utilisée dans `test_pipeline.py`.
 
 ---
