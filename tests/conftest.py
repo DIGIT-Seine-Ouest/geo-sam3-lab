@@ -13,10 +13,13 @@ def sample_geotiff(tmp_path):
     path = tmp_path / "test.tif"
     transform = Affine(0.2, 0, 700000, 0, -0.2, 6600000)
     with rasterio.open(
-        path, "w",
+        path,
+        "w",
         driver="GTiff",
-        height=512, width=512,
-        count=3, dtype=np.uint8,
+        height=512,
+        width=512,
+        count=3,
+        dtype=np.uint8,
         crs=CRS.from_epsg(2154),
         transform=transform,
     ) as dst:

@@ -26,7 +26,8 @@ def export_geotiff(
     path.parent.mkdir(parents=True, exist_ok=True)
     merged = _merge_masks(masks, geo_meta)
     with rasterio.open(
-        path, "w",
+        path,
+        "w",
         driver="GTiff",
         height=geo_meta.height,
         width=geo_meta.width,

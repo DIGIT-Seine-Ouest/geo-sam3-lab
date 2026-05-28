@@ -25,8 +25,13 @@ def test_wrong_extension(tmp_path):
 def test_no_crs(tmp_path):
     path = tmp_path / "nocrs.tif"
     with rasterio.open(
-        path, "w", driver="GTiff",
-        height=512, width=512, count=1, dtype=np.uint8,
+        path,
+        "w",
+        driver="GTiff",
+        height=512,
+        width=512,
+        count=1,
+        dtype=np.uint8,
     ) as dst:
         dst.write(np.zeros((1, 512, 512), dtype=np.uint8))
     with pytest.raises(InvalidGeoTIFFError):
@@ -36,8 +41,13 @@ def test_no_crs(tmp_path):
 def test_wrong_tile_size_warns(tmp_path):
     path = tmp_path / "big.tif"
     with rasterio.open(
-        path, "w", driver="GTiff",
-        height=1024, width=1024, count=1, dtype=np.uint8,
+        path,
+        "w",
+        driver="GTiff",
+        height=1024,
+        width=1024,
+        count=1,
+        dtype=np.uint8,
         crs="EPSG:2154",
         transform=Affine(0.2, 0, 0, 0, -0.2, 0),
     ) as dst:

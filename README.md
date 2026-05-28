@@ -5,7 +5,55 @@ Entrée : GeoTIFF. Sortie : masques de segmentation + couche raster géoréfére
 
 ---
 
-## Structure
+## Comment ça fonctionne
+
+Les images doivent être des GeoTIFF géoréférencés (CRS obligatoire), découpés en tuiles de 512 × 512 px. Chaque tuile passe par une validation stricte avant inférence.
+
+```mermaid
+flowchart LR
+    IN[GeoTIFF] --> V[Validation\nformat · CRS · taille]
+    V -->|invalide| ERR[Exception]
+    V -->|valide| G[Lecture\nPIL Image + GeoMetadata]
+    G --> M[Inférence SAM3\nprompt · threshold]
+    M --> VIZ[Visualisation\noverlay · stats]
+    M --> EXP[Export]
+    EXP --> R[GeoTIFF raster]
+    EXP --> J[GeoJSON vectoriel]
+```
+
+> Conçu pour l'orthophoto IGN 2024 (BD ORTHO® HR, 20 cm/pixel en urbain).
+
+## Utilisation
+
+```python
+from geo_sam3_inference.validate import validate_geotiff
+from geo_sam3_inference.geo import GeoImageReader
+from geo_sam3_inference.model import Sam3InferenceEngine
+from geo_sam3_inference.export import export_geotiff
+
+validate_geotiff("input.tif")
+image, geo_meta = GeoImageReader.read("input.tif")
+masks = Sam3InferenceEngine().predict_masks(image, "your prompt", threshold=0.35)
+export_geotiff(masks, geo_meta, "output/result.tif")
+```
+
+## Use cases
+
+Chaque use case est autonome — seuls le prompt et les paramètres varient, la librairie ne change pas.
+
+| # | Nom | Description | Doc |
+|---|---|---|---|
+| 1 | Passages piétons | Détection de zebra crossing sur ortho urbaine | [→ doc](use_cases/pedestrian_crossing/README.md) |
+
+## Dépendances
+
+`transformers` · `torch` · `rasterio` · `pillow` · `numpy` · `huggingface_hub` · `python-dotenv`
+
+---
+
+## Pour les contributeurs
+
+### Structure
 
 ```
 geo-sam3-lab/
@@ -20,74 +68,67 @@ geo-sam3-lab/
 │   └── export.py             # export_geotiff, export_geojson
 │
 ├── tests/
-│   ├── conftest.py           # Fixtures partagées (GeoTIFF factice, masque, GeoMetadata)
+│   ├── conftest.py           # Fixtures partagées
 │   ├── unit/
-│   │   ├── test_validate.py
-│   │   ├── test_geo.py
-│   │   ├── test_visualize.py
-│   │   └── test_export.py
 │   └── functional/
 │       └── test_pipeline.py  # GeoTIFF → lecture → export, modèle mocké
 │
 ├── use_cases/
 │   └── pedestrian_crossing/
-│       ├── README.md         # Description, résultats attendus, métriques
-│       ├── notebook.ipynb    # Démo interactive : code + visuels inline
-│       └── demo_img/         # Images GeoTIFF de test
+│       ├── README.md
+│       ├── notebook.ipynb
+│       └── demo_img/
 │
-├── .env.example
-├── LICENSE
+├── .github/workflows/        # CI (tests + lint) · CD (release)
+├── .pre-commit-config.yaml
 └── pyproject.toml
 ```
 
----
+### Démarrer
 
-## Flux et utilisation
+```bash
+git clone https://github.com/mandresyandri/geo-sam3-lab
+cd geo-sam3-lab
+pip install -e ".[dev]"
+pre-commit install            # installe les hooks locaux (une seule fois)
+```
 
-> **Prérequis données** : conçu pour l'orthophoto IGN 2024 (BD ORTHO® HR, 20 cm/pixel en urbain). Les images doivent être des GeoTIFF géoréférencés découpés en tuiles de 512 x 512 px avant inférence.
-
-Chaque tuile passe par une validation stricte, seuls les GeoTIFF avec CRS sont acceptés.
+### Pipeline qualité
 
 ```mermaid
 flowchart LR
-    IN[GeoTIFF] --> V[validate.py]
-    V -->|invalide| ERR[Exception]
-    V -->|valide| G[geo.py\nPIL Image + GeoMetadata]
-    G --> M[model.py\npredict_masks\nprompt · threshold]
-    M --> VIZ[visualize.py\noverlay · stats]
-    M --> EXP[export.py]
-    EXP --> R[GeoTIFF raster]
-    EXP --> J[GeoJSON vectoriel]
+    A[git commit] --> B[pre-commit\nruff · mypy]
+    B -->|échec| C[❌ commit bloqué\ncorriger localement]
+    B -->|succès| D[commit OK]
+    D --> E[git push / PR]
+    E --> F[CI · ruff · mypy · pytest]
+    F -->|échec| G[❌ merge bloqué]
+    F -->|succès| H[✅ merge autorisé]
 ```
 
----
+| Outil | Rôle | Moment |
+|---|---|---|
+| `ruff` | Linting + formatage | pre-commit + CI |
+| `mypy` | Vérification des types | pre-commit + CI |
+| `pytest` | Tests | CI uniquement |
 
-4 lignes suffisent pour lancer une inférence sur n'importe quel use case.
-
-```python
-from geo_sam3_inference.validate import validate_geotiff
-from geo_sam3_inference.geo import GeoImageReader
-from geo_sam3_inference.model import Sam3InferenceEngine
-from geo_sam3_inference.export import export_geotiff
-
-validate_geotiff("input.tif")
-image, geo_meta = GeoImageReader.read("input.tif")
-masks = Sam3InferenceEngine().predict_masks(image, "your prompt", threshold=0.35)
-export_geotiff(masks, geo_meta, "output/result.tif")
+```bash
+pre-commit run --all-files    # vérifier sans commiter
+pytest                        # vérifier les tests avant d'ouvrir une PR
 ```
 
----
+### Releases
 
-## Use cases
+Les releases sont sous la responsabilité des mainteneurs. Un `git push` normal ne crée jamais de release.
 
-Chaque use case est un dossier autonome avec sa config (prompt, seuils), ses images de test et son script d'inférence. La librairie ne change pas seul le prompt et les paramètres varient.
+```mermaid
+flowchart LR
+    A[git tag v0.x.x\ngit push origin v0.x.x] --> B[CD · pytest]
+    B -->|succès| C[📦 geo_sam3_inference.zip\nattaché à la release GitHub]
+    B -->|échec| D[❌ release annulée]
+```
 
-| # | Nom | Description | Doc |
-|---|---|---|---|
-| 1 | Passages piétons | Détection de zebra crossing sur ortho urbaine | [→ doc](use_cases/pedestrian_crossing/README.md) |
+Le ZIP est utilisé dans les notebooks Colab / ArcGIS pour charger la librairie sans installation.
 
----
 
-## Dépendances
-
-`transformers` · `torch` · `rasterio` · `pillow` · `numpy` · `huggingface_hub` · `python-dotenv`
+OK pour ceci 

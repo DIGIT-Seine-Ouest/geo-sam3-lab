@@ -29,11 +29,11 @@ class Sam3InferenceEngine:
     def predict_masks(
         self, image: Image.Image, prompt: str, threshold: float = 0.4
     ) -> list[Image.Image]:
-        if self.model is None:
+        if self.model is None or self.processor is None:
             return []
-        inputs = self.processor(
-            images=image, text=prompt, return_tensors="pt"
-        ).to(self.device)
+        inputs = self.processor(images=image, text=prompt, return_tensors="pt").to(
+            self.device
+        )
         with torch.no_grad():
             outputs = self.model(**inputs)
         results = self.processor.post_process_instance_segmentation(

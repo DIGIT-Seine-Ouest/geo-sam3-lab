@@ -6,7 +6,7 @@ from geo_sam3_inference.geo import GeoImageReader
 from geo_sam3_inference.validate import validate_geotiff
 
 
-def test_full_pipeline(sample_geotiff, sample_geo_meta, tmp_path):
+def test_full_pipeline(sample_geotiff, tmp_path):
     validate_geotiff(sample_geotiff)
 
     image, geo_meta = GeoImageReader.read(sample_geotiff)
