@@ -129,3 +129,9 @@ flowchart LR
 ```
 
 Le ZIP est utilisé dans les notebooks Colab / ArcGIS pour charger la librairie sans installation.
+
+```bash
+# Créer et pousser un tag → déclenche la release automatiquement
+git tag v0.1.0
+git push origin v0.1.0
+```
